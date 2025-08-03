@@ -1,3 +1,4 @@
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args))
 const express = require('express')
 const User = require('../models/User')
 const { login } = require('../controllers/authController')
@@ -17,6 +18,18 @@ const signup = async (req, res) => {
 
   const user = new User({ username, email, password: hashed })
   await user.save()
+  try {
+    await fetch('https://hook.us2.make.com/bsl1ll65bf27xcn7jrcj15fvghc96j7m', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: user.email,
+        name: user.username,
+      })
+    })
+  } catch (err) {
+    console.error('Webhook failed:', err)
+  }
   res.status(201).json(user)
 }
 
